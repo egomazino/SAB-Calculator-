@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Steal A Brainrot Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+        }
+        
+        /* Light Theme (default) */
+        :root {
+            --bg-gradient-start: #f0f4ff;
+            --bg-gradient-end: #e0e7ff;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --panel-border: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-hover: #f1f5f9;
+            --card-selected: #dbeafe;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            --result-bg: #f8fafc;
+            --mut-btn-bg: #f1f5f9;
+            --mut-btn-border: #cbd5e1;
+            --mut-btn-text: #1e293b;
+            --trait-btn-bg: #f1f5f9;
+            --trait-btn-border: #cbd5e1;
+            --trait-btn-text: #1e293b;
+            --selected-trait-bg: #818cf8;
+            --reset-btn-bg: #e2e8f0;
+            --reset-btn-text: #475569;
+            --mode-btn-bg: #f1f5f9;
+            --mode-btn-text: #1e293b;
+            --mode-btn-active: #3b82f6;
+            --scrollbar-track: #e2e8f0;
+            --scrollbar-thumb: #94a3b8;
+        }
+        
+        /* Dark Theme */
+        body.dark {
+            --bg-gradient-start: #0a0f1c;
+            --bg-gradient-end: #0f172a;
+            --panel-bg: rgba(18, 25, 45, 0.9);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --card-bg: #0f172a;
+            --card-border: #1e2a4a;
+            --card-hover: #1e293b;
+            --card-selected: #1e3a5f;
+            --text-primary: #e0e7ff;
+            --text-secondary: #cbd5e6;
+            --text-muted: #94a3b8;
+            --input-bg: #0f172a;
+            --input-border: #2d3a5e;
+            --result-bg: #030712;
+            --mut-btn-bg: #0f172a;
+            --mut-btn-border: #2d3a5e;
+            --mut-btn-text: #cbd5e6;
+            --trait-btn-bg: #0f172a;
+            --trait-btn-border: #2d3a5e;
+            --trait-btn-text: #cbd5e6;
+            --selected-trait-bg: #7c3aed;
+            --reset-btn-bg: #1e293b;
+            --reset-btn-text: #94a3b8;
+            --mode-btn-bg: #0f172a;
+            --mode-btn-text: #cbd5e6;
+            --mode-btn-active: #2563eb;
+            --scrollbar-track: #0f172a;
+            --scrollbar-thumb: #3b82f6;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+        .header-left p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 0.25rem 0 0 0;
+        }
+        .header-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .theme-toggle, .donate-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 3rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+        }
+        .theme-toggle:hover, .donate-btn:hover {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+        .donate-btn {
+            background: #003087;
+            color: white;
+            border: none;
+        }
+        body.dark .donate-btn {
+            background: #1a4b8c;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--panel-border);
+        }
+        .panel h2 {
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #3b82f6;
+            display: inline-block;
+            padding-bottom: 0.25rem;
+        }
+        .search-box {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 2rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .search-box::placeholder {
+            color: var(--text-muted);
+        }
+        .items-list {
+            max-height: 450px;
+            overflow-y: auto;
+            border-radius: 1rem;
+        }
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-card:hover {
+            background: var(--card-hover);
+            border-color: #3b82f6;
+        }
+        .item-card.selected {
+            background: var(--card-selected);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+        }
+        .item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .item-income {
+            color: #c084fc;
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        .custom-income-area {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            border: 1px solid var(--card-border);
+        }
+        .custom-income-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .custom-income-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 2rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .multiplier-group {
+            margin-bottom: 1.5rem;
+        }
+        .multiplier-group h3 {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .multiplier-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .mut-btn, .trait-btn {
+            background: var(--mut-btn-bg);
+            border: 1px solid var(--mut-btn-border);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--mut-btn-text);
+        }
+        .mut-btn:hover, .trait-btn:hover {
+            background: var(--card-hover);
+            border-color: #60a5fa;
+        }
+        .mut-btn.selected {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            border-color: #60a5fa;
+            color: white;
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.3);
+        }
+        .trait-btn.selected {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            border-color: #a78bfa;
+            color: white;
+            box-shadow: 0 0 0 2px rgba(124,58,237,0.3);
+        }
+        .selected-traits-list {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            min-height: 80px;
+        }
+        .selected-trait-tag {
+            display: inline-block;
+            background: var(--selected-trait-bg);
+            color: white;
+            border-radius: 2rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            margin: 0.25rem;
+            cursor: pointer;
+        }
+        .result-area {
+            background: var(--result-bg);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1.5rem;
+            border: 1px solid var(--card-border);
+        }
+        .result-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c084fc, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            word-break: break-word;
+        }
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .items-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .items-list::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 10px;
+        }
+        .items-list::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 10px;
+        }
+        .reset-btn {
+            background: var(--reset-btn-bg);
+            border: 1px solid var(--input-border);
+            color: var(--reset-btn-text);
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover {
+            background: var(--card-hover);
+            color: var(--text-primary);
+        }
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .mode-btn {
+            background: var(--mode-btn-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            color: var(--mode-btn-text);
+            font-size: 0.85rem;
+        }
+        .mode-btn.active {
+            background: var(--mode-btn-active);
+            color: white;
+            border-color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-left">
+            <h1>🧠 Steal A Brainrot Calculator</h1>
+            <p>Calculate your total income per second with mutations and traits</p>
+        </div>
+        <div class="header-right">
+            <a href="https://paypal.me/EgoBM" target="_blank" class="donate-btn" id="donateBtn">
+                💰 Donate via PayPal
+            </a>
+            <button class="theme-toggle" id="themeToggleBtn">🌙 Dark Mode</button>
+        </div>
+    </div>
+
+    <div class="calculator-grid">
+        <!-- LEFT PANEL: BRAINROT SELECTION -->
+        <div class="panel">
+            <h2>📦 1. Select Brainrot</h2>
+            
+            <div class="mode-toggle">
+                <button id="presetModeBtn" class="mode-btn active">📋 Preset List</button>
+                <button id="customModeBtn" class="mode-btn">✏️ Custom Income</button>
+            </div>
+            
+            <!-- Preset Brainrot List (default visible) -->
+            <div id="presetSection">
+                <input type="text" id="searchBrainrot" class="search-box" placeholder="Search brainrot...">
+                <div id="brainrotList" class="items-list">
+                    <!-- Brainrots will be injected here -->
+                </div>
+            </div>
+            
+            <!-- Custom Income Section (hidden by default) -->
+            <div id="customSection" style="display: none;">
+                <div class="custom-income-area">
+                    <label class="custom-income-label">💰 Enter base income per second:</label>
+                    <input type="number" id="customIncomeInput" class="custom-income-input" placeholder="e.g., 750000000" value="1000000">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">Use this if a brainrot's income is inaccurate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: MUTATIONS & TRAITS -->
+        <div class="panel">
+            <h2>✨ 2. Select Multipliers</h2>
+            
+            <!-- Mutation Section (only one selectable) -->
+            <div class="multiplier-group">
+                <h3>⚡ Mutation (select only one)</h3>
+                <div id="mutationButtons" class="multiplier-buttons">
+                    <!-- Mutation buttons injected here -->
+                </div>
+            </div>
+
+            <!-- Traits Section (unlimited) -->
+            <div class="multiplier-group">
+                <h3>🎭 Traits (select as many as you want)</h3>
+                <div id="traitButtons" class="multiplier-buttons">
+                    <!-- Trait buttons injected here -->
+                </div>
+            </div>
+
+            <!-- Selected Traits Display -->
+            <div class="selected-traits-list" id="selectedTraitsList">
+                <span style="color: var(--text-muted); font-size:0.75rem;">No traits selected</span>
+            </div>
+            
+            <button class="reset-btn" id="resetTraitsBtn">✖ Clear all traits</button>
+        </div>
+    </div>
+
+    <!-- RESULT AREA -->
+    <div class="result-area">
+        <div class="result-label">Total Income Per Second</div>
+        <div class="result-value" id="resultValue">$0</div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // THEME TOGGLE FUNCTIONALITY
+    // ============================================================
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeToggleBtn.innerHTML = '☀️ Light Mode';
+    } else {
+        themeToggleBtn.innerHTML = '🌙 Dark Mode';
+    }
+    
+    themeToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        if (document.body.classList.contains('dark')) {
+            localStorage.setItem('theme', 'dark');
+            themeToggleBtn.innerHTML = '☀️ Light Mode';
+        } else {
+            localStorage.setItem('theme', 'light');
+            themeToggleBtn.innerHTML = '🌙 Dark Mode';
+        }
+    });
+
+    // ============================================================
+    // DATA: BRAINROTS (402 total)
+    // ============================================================
+    const brainrots = [
+        { name: "Noobini Pizzanini", income: 1 },
+        { name: "Lirilì Larilà", income: 3 },
+        { name: "Tim Cheese", income: 5 },
+        { name: "Fluriflura", income: 7 },
+        { name: "Talpa Di Fero", income: 9 },
+        { name: "Svinina Bombardino", income: 10 },
+        { name: "Noobini Santanini", income: 11 },
+        { name: "Raccooni Jandelini", income: 12 },
+        { name: "Pipi Kiwi", income: 13 },
+        { name: "Tartaragno", income: 13 },
+        { name: "Pipi Corni", income: 14 },
+        { name: "Holy Arepa", income: 14 },
+        { name: "Trippi Troppi", income: 15 },
+        { name: "Gangster Footera", income: 30 },
+        { name: "Bandito Bobritto", income: 35 },
+        { name: "Boneca Ambalabu", income: 40 },
+        { name: "Cacto Hipopotamo", income: 50 },
+        { name: "Ta Ta Ta Ta Sahur", income: 55 },
+        { name: "Cupcake Koala", income: 60 },
+        { name: "Tric Trac Baraboom", income: 65 },
+        { name: "Frogo Elfo", income: 67 },
+        { name: "Pipi Avocado", income: 70 },
+        { name: "Pengolino Nuvoletto", income: 72 },
+        { name: "Pinealotto Fruttarino", income: 75 },
+        { name: "Cappuccino Assassino", income: 75 },
+        { name: "Bandito Axolito", income: 90 },
+        { name: "Brr Brr Patapim", income: 100 },
+        { name: "Avocadini Antilopini", income: 115 },
+        { name: "Trulimero Trulicina", income: 125 },
+        { name: "Bambini Crostini", income: 135 },
+        { name: "Malame Amarele", income: 140 },
+        { name: "Bananita Dolphinita", income: 150 },
+        { name: "Perochello Lemonchello", income: 160 },
+        { name: "Brri Brri Bicus Dicus Bombicus", income: 175 },
+        { name: "Avocadini Guffo", income: 225 },
+        { name: "Ti Ti Ti Sahur", income: 225 },
+        { name: "Mangolini Parrocini", income: 235 },
+        { name: "Frogato Pirato", income: 240 },
+        { name: "Gato Celesto", income: 250 },
+        { name: "Salamino Penguino", income: 250 },
+        { name: "Doi Doi Do", income: 260 },
+        { name: "Penguin Tree", income: 270 },
+        { name: "Wombo Rollo", income: 275 },
+        { name: "Penguino Cocosino", income: 300 },
+        { name: "Mummio Rappitto", income: 325 },
+        { name: "Chimpanzini Bananini", income: 300 },
+        { name: "Tirilikalika Tirilikalako", income: 450 },
+        { name: "Ballerina Cappuccina", income: 500 },
+        { name: "Burbaloni Loliloli", income: 600 },
+        { name: "Chef Crabracadabra", income: 600 },
+        { name: "Lionel Cactuseli", income: 650 },
+        { name: "Glorbo Fruttodrillo", income: 750 },
+        { name: "Quivioli Ameleonni", income: 900 },
+        { name: "Clickerino Crabo", income: 1000 },
+        { name: "Blueberrinni Octopusini", income: 1000 },
+        { name: "Caramello Filtrello", income: 1000 },
+        { name: "Pipi Potato", income: 1100 },
+        { name: "Strawberrelli Flamingelli", income: 1100 },
+        { name: "Cocosini Mama", income: 1200 },
+        { name: "Quackula", income: 1200 },
+        { name: "Pandaccini Bananini", income: 1250 },
+        { name: "Pi Pi Watermelon", income: 1300 },
+        { name: "Signore Carapace", income: 1300 },
+        { name: "Buho del Cielo", income: 1300 },
+        { name: "Sigma Boy", income: 1350 },
+        { name: "Chocco Bunny", income: 1400 },
+        { name: "Puffaball", income: 1500 },
+        { name: "Sigma Girl", income: 1800 },
+        { name: "Sealo Regalo", income: 1800 },
+        { name: "Buho de Fuego", income: 1800 },
+        { name: "Seraphino Gruyero", income: 1900 },
+        { name: "Frigo Camelo", income: 1900 },
+        { name: "Orangutini Ananassini", income: 2000 },
+        { name: "Rhino Toasterino", income: 2100 },
+        { name: "Bombardiro Crocodilo", income: 2500 },
+        { name: "Brutto Gialutto", income: 3000 },
+        { name: "Spioniro Golubiro", income: 3500 },
+        { name: "Bombombini Gusini", income: 5000 },
+        { name: "Zibra Zubra Zibralini", income: 6000 },
+        { name: "Tigrilini Watermelini", income: 6500 },
+        { name: "Avocadorilla", income: 7000 },
+        { name: "Cavallo Virtuoso", income: 7500 },
+        { name: "Gorillo Subwoofero", income: 7700 },
+        { name: "Gorillo Watermelondrillo", income: 8000 },
+        { name: "Stoppo Luminino", income: 8000 },
+        { name: "Tob Tobi Tobi", income: 8500 },
+        { name: "Lerulerulerule", income: 8700 },
+        { name: "Ganganzelli Trulala", income: 9000 },
+        { name: "Te Te Te Sahur", income: 9500 },
+        { name: "Rhino Helicopterino", income: 11000 },
+        { name: "Magi Ribbitini", income: 11500 },
+        { name: "Tracoducotulu Delapeladustuz", income: 12000 },
+        { name: "Jingle Jingle Sahur", income: 12200 },
+        { name: "Los Noobinis", income: 12500 },
+        { name: "Spongini Quackini", income: 13000 },
+        { name: "Cachorrito Melonito", income: 13000 },
+        { name: "Carloo", income: 13500 },
+        { name: "Harpuccino", income: 14000 },
+        { name: "Elefanto Frigo", income: 14000 },
+        { name: "Carrotini Brainini", income: 15000 },
+        { name: "Centrucci Nuclucci", income: 15500 },
+        { name: "Toiletto Focaccino", income: 16000 },
+        { name: "Jacko Spaventosa", income: 16200 },
+        { name: "Bananito Bandito", income: 16500 },
+        { name: "Tree Tree Tree Sahur", income: 17000 },
+        { name: "Fizzy Soda", income: 17200 },
+        { name: "Berenjello Angello", income: 18000 },
+        { name: "Cocofanto Elefanto", income: 17500 },
+        { name: "Antonio", income: 18500 },
+        { name: "Girafa Celestre", income: 20000 },
+        { name: "Gattatino Neonino", income: 35000 },
+        { name: "Gattatino Nyanino", income: 35000 },
+        { name: "Chihuanini Taconini", income: 45000 },
+        { name: "Matteo", income: 50000 },
+        { name: "Tralalero Tralala", income: 50000 },
+        { name: "Los Crocodillitos", income: 55000 },
+        { name: "Tigroligre Frutonni", income: 60000 },
+        { name: "Money Money Man", income: 65000 },
+        { name: "Espresso Signora", income: 70000 },
+        { name: "Odin Din Din Dun", income: 75000 },
+        { name: "Statutino Libertino", income: 75000 },
+        { name: "Tipi Topi Taco", income: 75000 },
+        { name: "Unclito Samito", income: 75000 },
+        { name: "Alessio", income: 85000 },
+        { name: "Tralalita Tralala", income: 100000 },
+        { name: "Tukanno Bananno", income: 100000 },
+        { name: "Orcalero Orcala", income: 100000 },
+        { name: "Extinct Ballerina", income: 125000 },
+        { name: "Vampira Cappucina", income: 125000 },
+        { name: "Trenostruzzo Turbo 3000", income: 150000 },
+        { name: "Jacko Jack Jack", income: 150000 },
+        { name: "Urubini Flamenguini", income: 150000 },
+        { name: "Capi Taco", income: 155000 },
+        { name: "Divino Platypio", income: 160000 },
+        { name: "Los Chihuaninis", income: 160000 },
+        { name: "Gattito Tacoto", income: 165000 },
+        { name: "Trippi Troppi Troppa Trippa", income: 175000 },
+        { name: "Las Capuchinas", income: 185000 },
+        { name: "Ballerino Lololo", income: 200000 },
+        { name: "Bulbito Bandito Traktorito", income: 205000 },
+        { name: "Los Tungtungtungcitos", income: 210000 },
+        { name: "Ballerina Peppermintina", income: 215000 },
+        { name: "Pakrahmatmamat", income: 215000 },
+        { name: "Los Bombinitos", income: 220000 },
+        { name: "Bombardini Tortinii", income: 225000 },
+        { name: "Brr es Teh Patipum", income: 225000 },
+        { name: "Piccione Macchina", income: 225000 },
+        { name: "Pakrahmatmatina", income: 225000 },
+        { name: "Tractoro Dinosauro", income: 230000 },
+        { name: "Crabbo Limonetta", income: 235000 },
+        { name: "Los Orcalitos", income: 235000 },
+        { name: "Cacasito Satalito", income: 240000 },
+        { name: "Orcalita Orcala", income: 240000 },
+        { name: "Aquanaut", income: 245000 },
+        { name: "Corn Corn Corn Sahur", income: 250000 },
+        { name: "Mummy Ambalabu", income: 250000 },
+        { name: "Snailenzo", income: 250000 },
+        { name: "Squalanana", income: 250000 },
+        { name: "Tartaruga Cisterna", income: 250000 },
+        { name: "Ginger Globo", income: 257500 },
+        { name: "Yeti Claus", income: 257500 },
+        { name: "Tootini Shrimpini", income: 260000 },
+        { name: "Granchiello Spiritell", income: 260000 },
+        { name: "Los Tipi Tacos", income: 260000 },
+        { name: "Frio Ninja", income: 265000 },
+        { name: "Buho De Noelo", income: 267500 },
+        { name: "Boba Panda", income: 270000 },
+        { name: "Piccionetta Macchina", income: 270000 },
+        { name: "Bambu Bambu Sahur", income: 275000 },
+        { name: "Los Gattitos", income: 275000 },
+        { name: "Mastodontico Telepiedone", income: 275000 },
+        { name: "Chrismasmamat", income: 277500 },
+        { name: "Astrolero Cervalero", income: 280000 },
+        { name: "Anpali Babel", income: 280000 },
+        { name: "Noo La Polizia", income: 280000 },
+        { name: "Luv Luv Luv", income: 282500 },
+        { name: "Cappuccino Clownino", income: 285000 },
+        { name: "Brasilini Berimbini", income: 285000 },
+        { name: "Patteo", income: 287500 },
+        { name: "Belula Beluga", income: 290000 },
+        { name: "Krupuk Pagi Pagi", income: 290000 },
+        { name: "Skull Skull Skull", income: 290000 },
+        { name: "Cocoa Assassino", income: 291000 },
+        { name: "Tentacolo Tecnico", income: 292500 },
+        { name: "Ginger Cisterna", income: 293500 },
+        { name: "Pandanini Frostini", income: 294000 },
+        { name: "Dolphini Jetskini", income: 294500 },
+        { name: "Pop Pop Sahur", income: 295000 },
+        { name: "Karkerheart Luvkur", income: 297500 },
+        { name: "Clovkur Kurkur", income: 305000 },
+        { name: "Dumborino Miracello", income: 315000 },
+        { name: "Bunny Tralala", income: 270000 },
+        { name: "Eggdin Egg Egg Dun", income: 310000 },
+        { name: "Easter Easter Easter Sahur", income: 1200000 },
+        { name: "Los Bunitos", income: 4200000 },
+        { name: "Baskito", income: 16000000 },
+        { name: "Churrito Bunnito", income: 21000000 },
+        { name: "Hopilikalika Hopilikalako", income: 55000000 },
+        { name: "Quackini Snackini", income: 65000000 },
+        { name: "Boppin Bunny", income: 80000000 },
+        { name: "Bunny and Eggy", income: 170000000 },
+        { name: "Hydra Bunny", income: 185000000 },
+        { name: "La Vacca Saturno Saturnita", income: 300000 },
+        { name: "Bisonte Giuppitere", income: 300000 },
+        { name: "Los Matteos", income: 300000 },
+        { name: "Sammyni Spyderini", income: 325000 },
+        { name: "Jackorilla", income: 315000 },
+        { name: "Karkerkar Kurkur", income: 325000 },
+        { name: "Trenostruzzo Turbo 4000", income: 335000 },
+        { name: "Torrtuginni Dragonfrutini", income: 350000 },
+        { name: "Dul Dul Dul", income: 375000 },
+        { name: "Blackhole Goat", income: 400000 },
+        { name: "Chachechi", income: 400000 },
+        { name: "Los Spyderinis", income: 425000 },
+        { name: "Agarrini La Palini", income: 425000 },
+        { name: "Extinct Tralalero", income: 450000 },
+        { name: "Fragola La La La", income: 450000 },
+        { name: "La Cucaracha", income: 475000 },
+        { name: "Los Tortus", income: 500000 },
+        { name: "Los Tralaleritos", income: 500000 },
+        { name: "Vulturino Skeletono", income: 500000 },
+        { name: "Zombie Tralala", income: 500000 },
+        { name: "Boatito Auratito", income: 525000 },
+        { name: "Guerriro Digitale", income: 550000 },
+        { name: "Yess my examine", income: 575000 },
+        { name: "La Karkerkar Combinasion", income: 600000 },
+        { name: "La Vacca Prese Presente", income: 600000 },
+        { name: "Reindeer Tralala", income: 600000 },
+        { name: "Extinct Matteo", income: 625000 },
+        { name: "Las Tralaleritas", income: 650000 },
+        { name: "Rocco Disco", income: 650000 },
+        { name: "Pumpkini Spyderini", income: 650000 },
+        { name: "Los Trios", income: 700000 },
+        { name: "Frankentteo", income: 700000 },
+        { name: "Job Job Job Sahur", income: 700000 },
+        { name: "Karker Sahur", income: 725000 },
+        { name: "Las Vaquitas Saturnitas", income: 750000 },
+        { name: "Los Karkeritos", income: 750000 },
+        { name: "Santteo", income: 800000 },
+        { name: "Fishboard", income: 825000 },
+        { name: "Buntteo", income: 850000 },
+        { name: "La Vacca Jacko Linterino", income: 850000 },
+        { name: "Triplito Tralaleritos", income: 875000 },
+        { name: "Paradiso Axolottino", income: 900000 },
+        { name: "Trickolino", income: 900000 },
+        { name: "GOAT", income: 950000 },
+        { name: "Giftini Spyderini", income: 999900 },
+        { name: "Love Love Love Sahur", income: 1000000 },
+        { name: "Graipuss Medussi", income: 1000000 },
+        { name: "Perrito Burrito", income: 1000000 },
+        { name: "La Vacca Lepre Lepreino", income: 1100000 },
+        { name: "1x1x1x1", income: 1100000 },
+        { name: "Los Cucarachas", income: 1200000 },
+        { name: "Please my Present", income: 1300000 },
+        { name: "Cuadramat and Pakrahmatmamat", income: 1400000 },
+        { name: "Bunnyman", income: 1500000 },
+        { name: "Tung Tung Tung Sahur", income: 1500000 },
+        { name: "Los Jobcitos", income: 1500000 },
+        { name: "Nooo My Hotspot", income: 1500000 },
+        { name: "Noo my examine", income: 1700000 },
+        { name: "La Sahur Combinasion", income: 2000000 },
+        { name: "List List List Sahur", income: 2000000 },
+        { name: "Telemorte", income: 2000000 },
+        { name: "Bunny Bunny Bunny Sahur", income: 2250000 },
+        { name: "To to to Sahur", income: 2250000 },
+        { name: "Pirulitoita Bicicleteira", income: 2500000 },
+        { name: "25", income: 2500000 },
+        { name: "Pot Hotspot", income: 2500000 },
+        { name: "Santa Hotspot", income: 2600000 },
+        { name: "Horegini Boom", income: 2750000 },
+        { name: "Pot Pumpkin", income: 3000000 },
+        { name: "Naughty Naughty", income: 3000000 },
+        { name: "Quesadilla Crocodila", income: 3000000 },
+        { name: "Bunito Bunito Spinito", income: 3000000 },
+        { name: "Cupid Cupid Sahur", income: 3100000 },
+        { name: "Mi Gatito", income: 3200000 },
+        { name: "Ho Ho Ho Sahur", income: 3200000 },
+        { name: "Cupid Hotspot", income: 3500000 },
+        { name: "Eid Eid Eid Sahur", income: 3500000 },
+        { name: "Chicleteira Bicicleteira", income: 3500000 },
+        { name: "Brunito Marsito", income: 3500000 },
+        { name: "Quesadillo Vampiro", income: 3500000 },
+        { name: "Luck Luck Luck Sahur", income: 3700000 },
+        { name: "Granny", income: 4000000 },
+        { name: "Chicleteirina Bicicleteirina", income: 4000000 },
+        { name: "Burrito Bandito", income: 4000000 },
+        { name: "Chill Puppy", income: 4000000 },
+        { name: "Los Quesadillas", income: 4500000 },
+        { name: "Arcadopus", income: 5000000 },
+        { name: "Noo my candy", income: 5000000 },
+        { name: "Serafinna Medusella", income: 5500000 },
+        { name: "Los Nooo My Hotspotsitos", income: 5500000 },
+        { name: "Noo my Present", income: 6000000 },
+        { name: "Rang Ring Bus", income: 6000000 },
+        { name: "Los Mi Gatitos", income: 6500000 },
+        { name: "Guest 666", income: 6600000 },
+        { name: "Noo my Eggs", income: 7000000 },
+        { name: "Los Chicleteiras", income: 7000000 },
+        { name: "67", income: 7500000 },
+        { name: "Donkeyturbo Express", income: 7500000 },
+        { name: "Los Burritos", income: 8500000 },
+        { name: "Los 25", income: 10000000 },
+        { name: "La Grande Combinasion", income: 10000000 },
+        { name: "Tacorillo Crocodillo", income: 12500000 },
+        { name: "Mariachi Corazoni", income: 12500000 },
+        { name: "Noo my Heart", income: 13000000 },
+        { name: "Swag Soda", income: 13000000 },
+        { name: "Noo my Gold", income: 13500000 },
+        { name: "Chimnino", income: 14000000 },
+        { name: "Chicleteira Noelteira", income: 15000000 },
+        { name: "Los Combinasionas", income: 15000000 },
+        { name: "Nuclearo Dinossauro", income: 15000000 },
+        { name: "Fishino Clownino", income: 15500000 },
+        { name: "Los Sweethearts", income: 16500000 },
+        { name: "Tacorita Bicicleta", income: 16500000 },
+        { name: "Spinny Hammy", income: 17000000 },
+        { name: "DJ Panda", income: 17500000 },
+        { name: "Las Sis", income: 17500000 },
+        { name: "Chicleteira Cupideira", income: 17500000 },
+        { name: "Los Planitos", income: 18500000 },
+        { name: "Snailo Clovero", income: 18500000 },
+        { name: "Los Jolly Combinasionas", income: 20000000 },
+        { name: "Cigno Fulgoro", income: 20000000 },
+        { name: "Los Spooky Combinasionas", income: 20000000 },
+        { name: "Los Hotspotsitos", income: 20000000 },
+        { name: "Money Money Puggy", income: 21000000 },
+        { name: "Los Mobilis", income: 22000000 },
+        { name: "Celularcini Viciosini", income: 22500000 },
+        { name: "Los 67", income: 22500000 },
+        { name: "Los Candies", income: 23000000 },
+        { name: "La Extinct Grande", income: 23500000 },
+        { name: "Los Bros", income: 24000000 },
+        { name: "Bacuru and Egguru", income: 24000000 },
+        { name: "La Spooky Grande", income: 24500000 },
+        { name: "Chillin Chili", income: 25000000 },
+        { name: "Money Money Reindeer", income: 25000000 },
+        { name: "Chipso and Queso", income: 25000000 },
+        { name: "Tuff Toucan", income: 26000000 },
+        { name: "Mieteteira Bicicleteira", income: 26000000 },
+        { name: "Gobblino Uniciclino", income: 27500000 },
+        { name: "Tralaledon", income: 27500000 },
+        { name: "Los Cupids", income: 30000000 },
+        { name: "Los Puggies", income: 30000000 },
+        { name: "W or L", income: 30000000 },
+        { name: "Esok Sekolah", income: 30000000 },
+        { name: "La Jolly Grande", income: 30000000 },
+        { name: "Los Primos", income: 31000000 },
+        { name: "Eviledon", income: 31500000 },
+        { name: "Los Tacoritas", income: 32000000 },
+        { name: "Lovin Rose", income: 32500000 },
+        { name: "Tang Tang Keletang", income: 33500000 },
+        { name: "Ketupat Kepat", income: 35000000 },
+        { name: "La Taco Combinasion", income: 35000000 },
+        { name: "Dug Dug Dug", income: 35000000 },
+        { name: "Tictac Sahur", income: 37500000 },
+        { name: "Swaggy Bros", income: 40000000 },
+        { name: "La Romantic Grande", income: 40000000 },
+        { name: "La Supreme Combinasion", income: 40000000 },
+        { name: "Orcaledon", income: 40000000 },
+        { name: "Ketchuru And Musturu", income: 42500000 },
+        { name: "Jolly Jolly Sahur", income: 45000000 },
+        { name: "Gold Gold Gold", income: 45000000 },
+        { name: "Lavadorito Spinito", income: 45000000 },
+        { name: "Nacho Spyder", income: 50000000 },
+        { name: "Rosetti Tualetti", income: 50000000 },
+        { name: "Garama and Madundung", income: 50000000 },
+        { name: "Cloverat Clapat", income: 60000000 },
+        { name: "Spaghetti Tualetti", income: 60000000 },
+        { name: "Ventoliero Pavonero", income: 65000000 },
+        { name: "Festive 67", income: 67000000 },
+        { name: "Los Spaghettis", income: 70000000 },
+        { name: "Sammyni Fattini", income: 70000000 },
+        { name: "Hokka Horloge", income: 75000000 },
+        { name: "Ginger Gerat", income: 75000000 },
+        { name: "La Ginger Sekolah", income: 75000000 },
+        { name: "Spooky and Pumpky", income: 80000000 },
+        { name: "La Food Combinasion", income: 90000000 },
+        { name: "Fragrama and Chocrama", income: 100000000 },
+        { name: "La Casa Boo", income: 100000000 },
+        { name: "Los Sekolahs", income: 110000000 },
+        { name: "Foxini Lanternini", income: 115000000 },
+        { name: "La Secret Combinasion", income: 125000000 },
+        { name: "Fortunu and Cashuru", income: 130000000 },
+        { name: "Los Amigos", income: 130000000 },
+        { name: "Reinito Sleighito", income: 140000000 },
+        { name: "Ketupat Bros", income: 145000000 },
+        { name: "Burguro And Fryuro", income: 150000000 },
+        { name: "Cooki and Milki", income: 155000000 },
+        { name: "Capitano Moby", income: 160000000 },
+        { name: "Rosey and Teddy", income: 165000000 },
+        { name: "Popcuru and Fizzuru", income: 170000000 },
+        { name: "Cerberus", income: 175000000 },
+        { name: "Celestial Pegasus", income: 175000000 },
+        { name: "Love Love Bear", income: 225000000 },
+        { name: "Dragon Cannelloni", income: 250000000 },
+        { name: "Dragon Gingerini", income: 300000000 },
+        { name: "Hydra Dragon Cannelloni", income: 350000000 },
+        { name: "Griffin", income: 400000000 },
+        { name: "Skibidi Toilet", income: 450000000 },
+        { name: "Headless Horseman", income: 550000000 },
+        { name: "Meowl", income: 600000000 },
+        { name: "Strawberry Elephant", income: 750000000 }
+    ];
+
+    // ============================================================
+    // DATA: MUTATIONS
+    // ============================================================
+    const mutations = [
+        { name: "Gold", multiplier: 1.25 },
+        { name: "Diamond", multiplier: 1.5 },
+        { name: "Galaxy", multiplier: 7 },
+        { name: "Rainbow", multiplier: 10 },
+        { name: "Yin Yang", multiplier: 7.5 },
+        { name: "Radioactive", multiplier: 8.5 },
+        { name: "Cursed", multiplier: 9 },
+        { name: "Divine", multiplier: 10 }
+    ];
+
+    // ============================================================
+    // DATA: TRAITS
+    // ============================================================
+    const traits = [
+        { name: "Strawberry", multiplier: 8, icon: "https://static.wikia.nocookie.net/stealabr/images/6/6d/Strawberry.png/revision/latest?cb=20260314223544" },
+        { name: "Meowl", multiplier: 7 },
+        { name: "Skibidi", multiplier: 6 },
+        { name: "Reindeer Pet", multiplier: 5 },
+        { name: "Chocolate", multiplier: 4.5 },
+        { name: "26", multiplier: 5 },
+        { name: "Halo", multiplier: 5 },
+        { name: "Lucky", multiplier: 5 },
+        { name: "Jack O'Lantern Pet", multiplier: 4.5 },
+        { name: "Bunny Ears", multiplier: 4.5 },
+        { name: "Santa Hat", multiplier: 4 },
+        { name: "RIP Tombstone", multiplier: 3.5 },
+        { name: "Witching Hour", multiplier: 3 },
+        { name: "Skeleton", multiplier: 3 },
+        { name: "10B", multiplier: 3 },
+        { name: "Orange Balloon", multiplier: 3 },
+        { name: "Green Balloon", multiplier: 3.5 },
+        { name: "Blue Balloon", multiplier: 4 },
+        { name: "Red Balloon", multiplier: 5 },
+        { name: "Pink Balloon", multiplier: 5.5 },
+        { name: "Rainbow Balloon", multiplier: 6.5 },
+        { name: "Orange Egg", multiplier: 3 },
+        { name: "Green Egg", multiplier: 4 },
+        { name: "Blue Egg", multiplier: 4.5 },
+        { name: "Pink Egg", multiplier: 6.7 },
+        { name: "Paint", multiplier: 5 },
+        { name: ":3", multiplier: 4.5 },
+        { name: "Tie", multiplier: 3.75 },
+        { name: "Spider", multiplier: 3.5 },
+        { name: "Matteo Hat", multiplier: 3.5 },
+        { name: "Galactic", multiplier: 3 },
+        { name: "Explosive", multiplier: 3 },
+        { name: "Shark Fin", multiplier: 3 },
+        { name: "Brazil", multiplier: 5 },
+        { name: "Indonesia", multiplier: 4 },
+        { name: "Sombrero", multiplier: 4 },
+        { name: "Granny", multiplier: 5.5 },
+        { name: "Fire", multiplier: 5 },
+        { name: "Rose", multiplier: 5 },
+        { name: "Fireworks", multiplier: 5 },
+        { name: "Nyan", multiplier: 5 },
+        { name: "Lightning", multiplier: 5 },
+        { name: "Disco", multiplier: 4 },
+        { name: "Glitched", multiplier: 4 },
+        { name: "Crab Claw", multiplier: 4 },
+        { name: "Zombie", multiplier: 4 },
+        { name: "Bubblegum", multiplier: 3 },
+        { name: "UFO", multiplier: 2 },
+        { name: "Taco", multiplier: 2 }
+    ];
+
+    // ============================================================
+    // APPLICATION STATE
+    // ============================================================
+    let selectedBrainrot = null;
+    let selectedMutation = null;
+    let selectedTraits = new Set();
+    let useCustomIncome = false;
+    let customIncomeValue = 1000000;
+
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+    function formatNumber(num) {
+        let roundedNum = Math.round(num);
+        
+        if (roundedNum >= 1e12) return '$' + (roundedNum / 1e12).toFixed(2) + 'T';
+        if (roundedNum >= 1e9) return '$' + (roundedNum / 1e9).toFixed(2) + 'B';
+        if (roundedNum >= 1e6) return '$' + (roundedNum / 1e6).toFixed(2) + 'M';
+        if (roundedNum >= 1e3) return '$' + (roundedNum / 1e3).toFixed(2) + 'K';
+        return '$' + roundedNum.toLocaleString();
+    }
+
+    function getCurrentBaseIncome() {
+        if (useCustomIncome) {
+            return customIncomeValue;
+        } else if (selectedBrainrot) {
+            return selectedBrainrot.income;
+        }
+        return 0;
+    }
+
+    function calculateTotal() {
+        let baseIncome = getCurrentBaseIncome();
+        let mutationMultiplier = selectedMutation ? selectedMutation.multiplier : 0;
+        
+        let traitsSum = 0;
+        for (let trait of selectedTraits) {
+            traitsSum += trait.multiplier;
+        }
+        
+        let totalMultiplier = mutationMultiplier + traitsSum;
+        let totalIncome = baseIncome * totalMultiplier;
+        
+        let roundedIncome = Math.round(totalIncome);
+        
+        document.getElementById('resultValue').innerHTML = formatNumber(roundedIncome) + '<span style="font-size:1rem;">/s</span>';
+    }
+
+    // ============================================================
+    // RENDER FUNCTIONS
+    // ============================================================
+    function renderBrainrots(searchTerm = '') {
+        const container = document.getElementById('brainrotList');
+        const filtered = brainrots.filter(b => 
+            b.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        container.innerHTML = filtered.map(b => `
+            <div class="item-card ${selectedBrainrot?.name === b.name && !useCustomIncome ? 'selected' : ''}" onclick="selectBrainrot('${b.name.replace(/'/g, "\\'")}')">
+                <span class="item-name">${b.name}</span>
+                <span class="item-income">${formatNumber(Math.round(b.income))}/s</span>
+            </div>
+        `).join('');
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:2rem;">No brainrots found</div>';
+        }
+    }
+    
+    function renderMutations() {
+        const container = document.getElementById('mutationButtons');
+        container.innerHTML = mutations.map(m => `
+            <button class="mut-btn ${selectedMutation?.name === m.name ? 'selected' : ''}" onclick="selectMutation('${m.name}')">
+                ${m.name}
+            </button>
+        `).join('');
+    }
+    
+    function renderTraits() {
+        const container = document.getElementById('traitButtons');
+        container.innerHTML = traits.map(t => `
+            <button class="trait-btn ${selectedTraits.has(t) ? 'selected' : ''}" onclick="toggleTrait('${t.name}')">
+                ${t.name}
+            </button>
+        `).join('');
+    }
+    
+    function renderSelectedTraits() {
+        const container = document.getElementById('selectedTraitsList');
+        if (selectedTraits.size === 0) {
+            container.innerHTML = '<span style="color: var(--text-muted); font-size:0.75rem;">No traits selected</span>';
+            return;
+        }
+        
+        container.innerHTML = Array.from(selectedTraits).map(t => `
+            <span class="selected-trait-tag" onclick="toggleTrait('${t.name}')">
+                ${t.name} ✕
+            </span>
+        `).join('');
+    }
+    
+    function updateUIMode() {
+        const presetSection = document.getElementById('presetSection');
+        const customSection = document.getElementById('customSection');
+        const presetBtn = document.getElementById('presetModeBtn');
+        const customBtn = document.getElementById('customModeBtn');
+        
+        if (useCustomIncome) {
+            presetSection.style.display = 'none';
+            customSection.style.display = 'block';
+            presetBtn.classList.remove('active');
+            customBtn.classList.add('active');
+            selectedBrainrot = null;
+            renderBrainrots(document.getElementById('searchBrainrot').value);
+        } else {
+            presetSection.style.display = 'block';
+            customSection.style.display = 'none';
+            presetBtn.classList.add('active');
+            customBtn.classList.remove('active');
+        }
+        calculateTotal();
+    }
+    
+    // ============================================================
+    // EVENT HANDLERS
+    // ============================================================
+    window.selectBrainrot = function(name) {
+        useCustomIncome = false;
+        selectedBrainrot = brainrots.find(b => b.name === name);
+        document.getElementById('customIncomeInput').value = selectedBrainrot.income;
+        updateUIMode();
+        renderBrainrots(document.getElementById('searchBrainrot').value);
+        calculateTotal();
+    };
+    
+    window.selectMutation = function(name) {
+        if (selectedMutation?.name === name) {
+            selectedMutation = null;
+        } else {
+            selectedMutation = mutations.find(m => m.name === name);
+        }
+        renderMutations();
+        calculateTotal();
+    };
+    
+    window.toggleTrait = function(name) {
+        const trait = traits.find(t => t.name === name);
+        if (selectedTraits.has(trait)) {
+            selectedTraits.delete(trait);
+        } else {
+            selectedTraits.add(trait);
+        }
+        renderTraits();
+        renderSelectedTraits();
+        calculateTotal();
+    };
+    
+    // Custom income handlers
+    document.getElementById('customModeBtn').addEventListener('click', () => {
+        useCustomIncome = true;
+        selectedBrainrot = null;
+        updateUIMode();
+        calculateTotal();
+    });
+    
+    document.getElementById('presetModeBtn').addEventListener('click', () => {
+        useCustomIncome = false;
+        updateUIMode();
+        renderBrainrots(document.getElementById('searchBrainrot').value);
+        calculateTotal();
+    });
+    
+    document.getElementById('customIncomeInput').addEventListener('input', (e) => {
+        customIncomeValue = parseFloat(e.target.value) || 0;
+        if (useCustomIncome) {
+            calculateTotal();
+        }
+    });
+    
+    // Reset all traits
+    document.getElementById('resetTraitsBtn').addEventListener('click', () => {
+        selectedTraits.clear();
+        renderTraits();
+        renderSelectedTraits();
+        calculateTotal();
+    });
+    
+    // Search functionality
+    document.getElementById('searchBrainrot').addEventListener('input', (e) => {
+        renderBrainrots(e.target.value);
+    });
+    
+    // ============================================================
+    // INITIALIZE
+    // ============================================================
+    renderBrainrots('');
+    renderMutations();
+    renderTraits();
+    renderSelectedTraits();
+</script>
+</body>
