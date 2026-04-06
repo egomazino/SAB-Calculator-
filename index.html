@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Steal A Brainrot - Trade Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+        }
+        
+        /* Light Theme (default) */
+        :root {
+            --bg-gradient-start: #f0f4ff;
+            --bg-gradient-end: #e0e7ff;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --panel-border: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-hover: #f1f5f9;
+            --card-selected: #dbeafe;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            --mut-btn-bg: #f1f5f9;
+            --mut-btn-border: #cbd5e1;
+            --mut-btn-text: #1e293b;
+            --trait-btn-bg: #f1f5f9;
+            --trait-btn-border: #cbd5e1;
+            --trait-btn-text: #1e293b;
+            --selected-trait-bg: #818cf8;
+            --reset-btn-bg: #e2e8f0;
+            --reset-btn-text: #475569;
+            --mode-btn-bg: #f1f5f9;
+            --mode-btn-text: #1e293b;
+            --mode-btn-active: #3b82f6;
+            --scrollbar-track: #e2e8f0;
+            --scrollbar-thumb: #94a3b8;
+            --chat-user-msg: #3b82f6;
+            --chat-other-msg: #e2e8f0;
+        }
+        
+        /* Dark Theme */
+        body.dark {
+            --bg-gradient-start: #0a0f1c;
+            --bg-gradient-end: #0f172a;
+            --panel-bg: rgba(18, 25, 45, 0.9);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --card-bg: #0f172a;
+            --card-border: #1e2a4a;
+            --card-hover: #1e293b;
+            --card-selected: #1e3a5f;
+            --text-primary: #e0e7ff;
+            --text-secondary: #cbd5e6;
+            --text-muted: #94a3b8;
+            --input-bg: #0f172a;
+            --input-border: #2d3a5e;
+            --mut-btn-bg: #0f172a;
+            --mut-btn-border: #2d3a5e;
+            --mut-btn-text: #cbd5e6;
+            --trait-btn-bg: #0f172a;
+            --trait-btn-border: #2d3a5e;
+            --trait-btn-text: #cbd5e6;
+            --selected-trait-bg: #7c3aed;
+            --reset-btn-bg: #1e293b;
+            --reset-btn-text: #94a3b8;
+            --mode-btn-bg: #0f172a;
+            --mode-btn-text: #cbd5e6;
+            --mode-btn-active: #2563eb;
+            --scrollbar-track: #0f172a;
+            --scrollbar-thumb: #3b82f6;
+            --chat-user-msg: #2563eb;
+            --chat-other-msg: #1e293b;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+        .header-left p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 0.25rem 0 0 0;
+        }
+        .header-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 3rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+        }
+        .nav-btn:hover {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+        .theme-toggle, .donate-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 3rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+        }
+        .donate-btn {
+            background: #003087;
+            color: white;
+            border: none;
+        }
+        body.dark .donate-btn {
+            background: #1a4b8c;
+        }
+        
+        /* Main Trade Grid */
+        .trade-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .trade-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .trade-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--panel-border);
+            min-height: 500px;
+        }
+        .trade-panel h2 {
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #3b82f6;
+            display: inline-block;
+            padding-bottom: 0.25rem;
+        }
+        .trade-items {
+            min-height: 300px;
+            margin-bottom: 1rem;
+        }
+        .trade-item {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--card-border);
+            position: relative;
+        }
+        .trade-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .trade-item-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .trade-item-value {
+            color: #c084fc;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        .trade-item-details {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .remove-item {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0 0.25rem;
+        }
+        .add-item-btn {
+            background: var(--mode-btn-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            color: var(--mode-btn-text);
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .add-item-btn:hover {
+            background: var(--mode-btn-active);
+            color: white;
+        }
+        .trade-summary {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+            border: 1px solid var(--card-border);
+        }
+        .trade-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #c084fc;
+        }
+        .verdict {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 2rem;
+        }
+        .verdict.win { background: #22c55e20; color: #22c55e; }
+        .verdict.fair { background: #eab30820; color: #eab308; }
+        .verdict.lose { background: #ef444420; color: #ef4444; }
+        
+        /* Chat Section */
+        .chat-section {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--panel-border);
+            margin-top: 1.5rem;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .chat-header h3 {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        .chat-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .clear-chat-btn {
+            background: #ef4444;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: white;
+        }
+        .chat-messages {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid var(--card-border);
+            margin-bottom: 1rem;
+        }
+        .chat-message {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 1rem;
+            word-break: break-word;
+        }
+        .chat-message-user {
+            background: var(--chat-user-msg);
+            color: white;
+            margin-left: 20%;
+            text-align: right;
+        }
+        .chat-message-other {
+            background: var(--chat-other-msg);
+            color: var(--text-primary);
+            margin-right: 20%;
+        }
+        .chat-message-header {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-bottom: 0.25rem;
+        }
+        .chat-message-text {
+            font-size: 0.9rem;
+        }
+        .chat-message-delete {
+            float: right;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-left: 0.5rem;
+        }
+        .chat-message-delete:hover {
+            opacity: 1;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 2rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        .chat-send-btn {
+            background: var(--mode-btn-active);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--card-border);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+        .modal-search {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        .modal-brainrot-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .modal-brainrot-item {
+            padding: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+        }
+        .modal-brainrot-item:hover {
+            background: var(--card-hover);
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+        .modal-close {
+            background: var(--reset-btn-bg);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+        .multiplier-selector {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--card-hover);
+            border-radius: 1rem;
+        }
+        .multiplier-selector h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        .selector-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+        .small-btn {
+            background: var(--mut-btn-bg);
+            border: 1px solid var(--mut-btn-border);
+            border-radius: 2rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .small-btn.selected {
+            background: var(--mode-btn-active);
+            color: white;
+        }
+        .reset-btn {
+            background: var(--reset-btn-bg);
+            border: 1px solid var(--input-border);
+            color: var(--reset-btn-text);
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-left">
+            <h1>🔄 Steal A Brainrot - Trade Calculator</h1>
+            <p>Compare trade values using income per second (with mutations & traits)</p>
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="nav-btn">🧮 Multiplier Calculator</a>
+            <a href="https://paypal.me/EgoBM" target="_blank" class="donate-btn">💰 Donate via PayPal</a>
+            <button class="theme-toggle" id="themeToggleBtn">🌙 Dark Mode</button>
+        </div>
+    </div>
+
+    <div class="trade-grid">
+        <!-- YOU GIVE Panel -->
+        <div class="trade-panel" style="border-top: 4px solid #ef4444;">
+            <h2>📤 You Give</h2>
+            <div id="giveItems" class="trade-items">
+                <div style="color: var(--text-muted); text-align:center; padding:2rem;">No items added. Click "Add Item" below.</div>
+            </div>
+            <button class="add-item-btn" onclick="openAddModal('give')">+ Add Item</button>
+            <div class="trade-summary">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total You Give</div>
+                <div class="trade-total" id="giveTotal">$0</div>
+            </div>
+        </div>
+
+        <!-- YOU RECEIVE Panel -->
+        <div class="trade-panel" style="border-top: 4px solid #22c55e;">
+            <h2>📥 You Receive</h2>
+            <div id="receiveItems" class="trade-items">
+                <div style="color: var(--text-muted); text-align:center; padding:2rem;">No items added. Click "Add Item" below.</div>
+            </div>
+            <button class="add-item-btn" onclick="openAddModal('receive')">+ Add Item</button>
+            <div class="trade-summary">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total You Receive</div>
+                <div class="trade-total" id="receiveTotal">$0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verdict Panel -->
+    <div class="trade-summary" style="margin-top: 0; text-align: center;">
+        <div id="verdict" class="verdict">Add items to both sides to see verdict</div>
+    </div>
+
+    <!-- CHAT SECTION -->
+    <div class="chat-section">
+        <div class="chat-header">
+            <h3>💬 Trade Chat (Local - Messages saved on your device only)</h3>
+            <div class="chat-controls">
+                <button class="clear-chat-btn" id="clearChatBtn">🗑️ Clear All Messages</button>
+            </div>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Type your message... (visible only to you)">
+            <button class="chat-send-btn" id="sendChatBtn">Send</button>
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+            ⚠️ Messages are saved only on YOUR device. Other traders cannot see your messages.
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding items -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <h3>Add Brainrot to <span id="modalSideLabel">Give</span></h3>
+        <input type="text" id="modalSearch" class="modal-search" placeholder="Search brainrot...">
+        <div id="modalBrainrotList" class="modal-brainrot-list"></div>
+        
+        <div id="multiplierSelector" class="multiplier-selector" style="display: none;">
+            <h4>⚡ Mutation (select only one)</h4>
+            <div id="modalMutationButtons" class="selector-buttons"></div>
+            <h4 style="margin-top:0.75rem;">🎭 Traits (select as many as you want)</h4>
+            <div id="modalTraitButtons" class="selector-buttons"></div>
+            <div id="modalSelectedTraits" style="margin-top:0.5rem; font-size:0.7rem; color:var(--text-muted);"></div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-close" onclick="closeModal()">Cancel</button>
+            <button class="reset-btn" id="confirmAddBtn" style="background:#3b82f6; color:white;" onclick="confirmAddItem()">Add Item</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // THEME TOGGLE
+    // ============================================================
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeToggleBtn.innerHTML = '☀️ Light Mode';
+    } else {
+        themeToggleBtn.innerHTML = '🌙 Dark Mode';
+    }
+    themeToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        if (document.body.classList.contains('dark')) {
+            localStorage.setItem('theme', 'dark');
+            themeToggleBtn.innerHTML = '☀️ Light Mode';
+        } else {
+            localStorage.setItem('theme', 'light');
+            themeToggleBtn.innerHTML = '🌙 Dark Mode';
+        }
+    });
+
+    // ============================================================
+    // DATA (same as multiplier calculator)
+    // ============================================================
+    const brainrots = [
+        { name: "Noobini Pizzanini", income: 1 },
+        { name: "Lirilì Larilà", income: 3 },
+        { name: "Tim Cheese", income: 5 },
+        { name: "Fluriflura", income: 7 },
+        { name: "Talpa Di Fero", income: 9 },
+        { name: "Svinina Bombardino", income: 10 },
+        { name: "Noobini Santanini", income: 11 },
+        { name: "Raccooni Jandelini", income: 12 },
+        { name: "Pipi Kiwi", income: 13 },
+        { name: "Tartaragno", income: 13 },
+        { name: "Pipi Corni", income: 14 },
+        { name: "Holy Arepa", income: 14 },
+        { name: "Trippi Troppi", income: 15 },
+        { name: "Gangster Footera", income: 30 },
+        { name: "Bandito Bobritto", income: 35 },
+        { name: "Boneca Ambalabu", income: 40 },
+        { name: "Cacto Hipopotamo", income: 50 },
+        { name: "Ta Ta Ta Ta Sahur", income: 55 },
+        { name: "Cupcake Koala", income: 60 },
+        { name: "Tric Trac Baraboom", income: 65 },
+        { name: "Frogo Elfo", income: 67 },
+        { name: "Pipi Avocado", income: 70 },
+        { name: "Pengolino Nuvoletto", income: 72 },
+        { name: "Pinealotto Fruttarino", income: 75 },
+        { name: "Cappuccino Assassino", income: 75 },
+        { name: "Bandito Axolito", income: 90 },
+        { name: "Brr Brr Patapim", income: 100 },
+        { name: "Avocadini Antilopini", income: 115 },
+        { name: "Trulimero Trulicina", income: 125 },
+        { name: "Bambini Crostini", income: 135 },
+        { name: "Malame Amarele", income: 140 },
+        { name: "Bananita Dolphinita", income: 150 },
+        { name: "Perochello Lemonchello", income: 160 },
+        { name: "Brri Brri Bicus Dicus Bombicus", income: 175 },
+        { name: "Avocadini Guffo", income: 225 },
+        { name: "Ti Ti Ti Sahur", income: 225 },
+        { name: "Mangolini Parrocini", income: 235 },
+        { name: "Frogato Pirato", income: 240 },
+        { name: "Gato Celesto", income: 250 },
+        { name: "Salamino Penguino", income: 250 },
+        { name: "Doi Doi Do", income: 260 },
+        { name: "Penguin Tree", income: 270 },
+        { name: "Wombo Rollo", income: 275 },
+        { name: "Penguino Cocosino", income: 300 },
+        { name: "Mummio Rappitto", income: 325 },
+        { name: "Chimpanzini Bananini", income: 300 },
+        { name: "Tirilikalika Tirilikalako", income: 450 },
+        { name: "Ballerina Cappuccina", income: 500 },
+        { name: "Burbaloni Loliloli", income: 600 },
+        { name: "Chef Crabracadabra", income: 600 },
+        { name: "Lionel Cactuseli", income: 650 },
+        { name: "Glorbo Fruttodrillo", income: 750 },
+        { name: "Quivioli Ameleonni", income: 900 },
+        { name: "Clickerino Crabo", income: 1000 },
+        { name: "Blueberrinni Octopusini", income: 1000 },
+        { name: "Caramello Filtrello", income: 1000 },
+        { name: "Pipi Potato", income: 1100 },
+        { name: "Strawberrelli Flamingelli", income: 1100 },
+        { name: "Cocosini Mama", income: 1200 },
+        { name: "Quackula", income: 1200 },
+        { name: "Pandaccini Bananini", income: 1250 },
+        { name: "Pi Pi Watermelon", income: 1300 },
+        { name: "Signore Carapace", income: 1300 },
+        { name: "Buho del Cielo", income: 1300 },
+        { name: "Sigma Boy", income: 1350 },
+        { name: "Chocco Bunny", income: 1400 },
+        { name: "Puffaball", income: 1500 },
+        { name: "Sigma Girl", income: 1800 },
+        { name: "Sealo Regalo", income: 1800 },
+        { name: "Buho de Fuego", income: 1800 },
+        { name: "Seraphino Gruyero", income: 1900 },
+        { name: "Frigo Camelo", income: 1900 },
+        { name: "Orangutini Ananassini", income: 2000 },
+        { name: "Rhino Toasterino", income: 2100 },
+        { name: "Bombardiro Crocodilo", income: 2500 },
+        { name: "Brutto Gialutto", income: 3000 },
+        { name: "Spioniro Golubiro", income: 3500 },
+        { name: "Bombombini Gusini", income: 5000 },
+        { name: "Zibra Zubra Zibralini", income: 6000 },
+        { name: "Tigrilini Watermelini", income: 6500 },
+        { name: "Avocadorilla", income: 7000 },
+        { name: "Cavallo Virtuoso", income: 7500 },
+        { name: "Gorillo Subwoofero", income: 7700 },
+        { name: "Gorillo Watermelondrillo", income: 8000 },
+        { name: "Stoppo Luminino", income: 8000 },
+        { name: "Tob Tobi Tobi", income: 8500 },
+        { name: "Lerulerulerule", income: 8700 },
+        { name: "Ganganzelli Trulala", income: 9000 },
+        { name: "Te Te Te Sahur", income: 9500 },
+        { name: "Rhino Helicopterino", income: 11000 },
+        { name: "Magi Ribbitini", income: 11500 },
+        { name: "Tracoducotulu Delapeladustuz", income: 12000 },
+        { name: "Jingle Jingle Sahur", income: 12200 },
+        { name: "Los Noobinis", income: 12500 },
+        { name: "Spongini Quackini", income: 13000 },
+        { name: "Cachorrito Melonito", income: 13000 },
+        { name: "Carloo", income: 13500 },
+        { name: "Harpuccino", income: 14000 },
+        { name: "Elefanto Frigo", income: 14000 },
+        { name: "Carrotini Brainini", income: 15000 },
+        { name: "Centrucci Nuclucci", income: 15500 },
+        { name: "Toiletto Focaccino", income: 16000 },
+        { name: "Jacko Spaventosa", income: 16200 },
+        { name: "Bananito Bandito", income: 16500 },
+        { name: "Tree Tree Tree Sahur", income: 17000 },
+        { name: "Fizzy Soda", income: 17200 },
+        { name: "Berenjello Angello", income: 18000 },
+        { name: "Cocofanto Elefanto", income: 17500 },
+        { name: "Antonio", income: 18500 },
+        { name: "Girafa Celestre", income: 20000 },
+        { name: "Gattatino Neonino", income: 35000 },
+        { name: "Gattatino Nyanino", income: 35000 },
+        { name: "Chihuanini Taconini", income: 45000 },
+        { name: "Matteo", income: 50000 },
+        { name: "Tralalero Tralala", income: 50000 },
+        { name: "Los Crocodillitos", income: 55000 },
+        { name: "Tigroligre Frutonni", income: 60000 },
+        { name: "Money Money Man", income: 65000 },
+        { name: "Espresso Signora", income: 70000 },
+        { name: "Odin Din Din Dun", income: 75000 },
+        { name: "Statutino Libertino", income: 75000 },
+        { name: "Tipi Topi Taco", income: 75000 },
+        { name: "Unclito Samito", income: 75000 },
+        { name: "Alessio", income: 85000 },
+        { name: "Tralalita Tralala", income: 100000 },
+        { name: "Tukanno Bananno", income: 100000 },
+        { name: "Orcalero Orcala", income: 100000 },
+        { name: "Extinct Ballerina", income: 125000 },
+        { name: "Vampira Cappucina", income: 125000 },
+        { name: "Trenostruzzo Turbo 3000", income: 150000 },
+        { name: "Jacko Jack Jack", income: 150000 },
+        { name: "Urubini Flamenguini", income: 150000 },
+        { name: "Capi Taco", income: 155000 },
+        { name: "Divino Platypio", income: 160000 },
+        { name: "Los Chihuaninis", income: 160000 },
+        { name: "Gattito Tacoto", income: 165000 },
+        { name: "Trippi Troppi Troppa Trippa", income: 175000 },
+        { name: "Las Capuchinas", income: 185000 },
+        { name: "Ballerino Lololo", income: 200000 },
+        { name: "Bulbito Bandito Traktorito", income: 205000 },
+        { name: "Los Tungtungtungcitos", income: 210000 },
+        { name: "Ballerina Peppermintina", income: 215000 },
+        { name: "Pakrahmatmamat", income: 215000 },
+        { name: "Los Bombinitos", income: 220000 },
+        { name: "Bombardini Tortinii", income: 225000 },
+        { name: "Brr es Teh Patipum", income: 225000 },
+        { name: "Piccione Macchina", income: 225000 },
+        { name: "Pakrahmatmatina", income: 225000 },
+        { name: "Tractoro Dinosauro", income: 230000 },
+        { name: "Crabbo Limonetta", income: 235000 },
+        { name: "Los Orcalitos", income: 235000 },
+        { name: "Cacasito Satalito", income: 240000 },
+        { name: "Orcalita Orcala", income: 240000 },
+        { name: "Aquanaut", income: 245000 },
+        { name: "Corn Corn Corn Sahur", income: 250000 },
+        { name: "Mummy Ambalabu", income: 250000 },
+        { name: "Snailenzo", income: 250000 },
+        { name: "Squalanana", income: 250000 },
+        { name: "Tartaruga Cisterna", income: 250000 },
+        { name: "Ginger Globo", income: 257500 },
+        { name: "Yeti Claus", income: 257500 },
+        { name: "Tootini Shrimpini", income: 260000 },
+        { name: "Granchiello Spiritell", income: 260000 },
+        { name: "Los Tipi Tacos", income: 260000 },
+        { name: "Frio Ninja", income: 265000 },
+        { name: "Buho De Noelo", income: 267500 },
+        { name: "Boba Panda", income: 270000 },
+        { name: "Piccionetta Macchina", income: 270000 },
+        { name: "Bambu Bambu Sahur", income: 275000 },
+        { name: "Los Gattitos", income: 275000 },
+        { name: "Mastodontico Telepiedone", income: 275000 },
+        { name: "Chrismasmamat", income: 277500 },
+        { name: "Astrolero Cervalero", income: 280000 },
+        { name: "Anpali Babel", income: 280000 },
+        { name: "Noo La Polizia", income: 280000 },
+        { name: "Luv Luv Luv", income: 282500 },
+        { name: "Cappuccino Clownino", income: 285000 },
+        { name: "Brasilini Berimbini", income: 285000 },
+        { name: "Patteo", income: 287500 },
+        { name: "Belula Beluga", income: 290000 },
+        { name: "Krupuk Pagi Pagi", income: 290000 },
+        { name: "Skull Skull Skull", income: 290000 },
+        { name: "Cocoa Assassino", income: 291000 },
+        { name: "Tentacolo Tecnico", income: 292500 },
+        { name: "Ginger Cisterna", income: 293500 },
+        { name: "Pandanini Frostini", income: 294000 },
+        { name: "Dolphini Jetskini", income: 294500 },
+        { name: "Pop Pop Sahur", income: 295000 },
+        { name: "Karkerheart Luvkur", income: 297500 },
+        { name: "Clovkur Kurkur", income: 305000 },
+        { name: "Dumborino Miracello", income: 315000 },
+        { name: "Bunny Tralala", income: 270000 },
+        { name: "Eggdin Egg Egg Dun", income: 310000 },
+        { name: "Easter Easter Easter Sahur", income: 1200000 },
+        { name: "Los Bunitos", income: 4200000 },
+        { name: "Baskito", income: 16000000 },
+        { name: "Churrito Bunnito", income: 21000000 },
+        { name: "Hopilikalika Hopilikalako", income: 55000000 },
+        { name: "Quackini Snackini", income: 65000000 },
+        { name: "Boppin Bunny", income: 80000000 },
+        { name: "Bunny and Eggy", income: 170000000 },
+        { name: "Hydra Bunny", income: 185000000 },
+        { name: "La Vacca Saturno Saturnita", income: 300000 },
+        { name: "Bisonte Giuppitere", income: 300000 },
+        { name: "Los Matteos", income: 300000 },
+        { name: "Sammyni Spyderini", income: 325000 },
+        { name: "Jackorilla", income: 315000 },
+        { name: "Karkerkar Kurkur", income: 325000 },
+        { name: "Trenostruzzo Turbo 4000", income: 335000 },
+        { name: "Torrtuginni Dragonfrutini", income: 350000 },
+        { name: "Dul Dul Dul", income: 375000 },
+        { name: "Blackhole Goat", income: 400000 },
+        { name: "Chachechi", income: 400000 },
+        { name: "Los Spyderinis", income: 425000 },
+        { name: "Agarrini La Palini", income: 425000 },
+        { name: "Extinct Tralalero", income: 450000 },
+        { name: "Fragola La La La", income: 450000 },
+        { name: "La Cucaracha", income: 475000 },
+        { name: "Los Tortus", income: 500000 },
+        { name: "Los Tralaleritos", income: 500000 },
+        { name: "Vulturino Skeletono", income: 500000 },
+        { name: "Zombie Tralala", income: 500000 },
+        { name: "Boatito Auratito", income: 525000 },
+        { name: "Guerriro Digitale", income: 550000 },
+        { name: "Yess my examine", income: 575000 },
+        { name: "La Karkerkar Combinasion", income: 600000 },
+        { name: "La Vacca Prese Presente", income: 600000 },
+        { name: "Reindeer Tralala", income: 600000 },
+        { name: "Extinct Matteo", income: 625000 },
+        { name: "Las Tralaleritas", income: 650000 },
+        { name: "Rocco Disco", income: 650000 },
+        { name: "Pumpkini Spyderini", income: 650000 },
+        { name: "Los Trios", income: 700000 },
+        { name: "Frankentteo", income: 700000 },
+        { name: "Job Job Job Sahur", income: 700000 },
+        { name: "Karker Sahur", income: 725000 },
+        { name: "Las Vaquitas Saturnitas", income: 750000 },
+        { name: "Los Karkeritos", income: 750000 },
+        { name: "Santteo", income: 800000 },
+        { name: "Fishboard", income: 825000 },
+        { name: "Buntteo", income: 850000 },
+        { name: "La Vacca Jacko Linterino", income: 850000 },
+        { name: "Triplito Tralaleritos", income: 875000 },
+        { name: "Paradiso Axolottino", income: 900000 },
+        { name: "Trickolino", income: 900000 },
+        { name: "GOAT", income: 950000 },
+        { name: "Giftini Spyderini", income: 999900 },
+        { name: "Love Love Love Sahur", income: 1000000 },
+        { name: "Graipuss Medussi", income: 1000000 },
+        { name: "Perrito Burrito", income: 1000000 },
+        { name: "La Vacca Lepre Lepreino", income: 1100000 },
+        { name: "1x1x1x1", income: 1100000 },
+        { name: "Los Cucarachas", income: 1200000 },
+        { name: "Please my Present", income: 1300000 },
+        { name: "Cuadramat and Pakrahmatmamat", income: 1400000 },
+        { name: "Bunnyman", income: 1500000 },
+        { name: "Tung Tung Tung Sahur", income: 1500000 },
+        { name: "Los Jobcitos", income: 1500000 },
+        { name: "Nooo My Hotspot", income: 1500000 },
+        { name: "Noo my examine", income: 1700000 },
+        { name: "La Sahur Combinasion", income: 2000000 },
+        { name: "List List List Sahur", income: 2000000 },
+        { name: "Telemorte", income: 2000000 },
+        { name: "Bunny Bunny Bunny Sahur", income: 2250000 },
+        { name: "To to to Sahur", income: 2250000 },
+        { name: "Pirulitoita Bicicleteira", income: 2500000 },
+        { name: "25", income: 2500000 },
+        { name: "Pot Hotspot", income: 2500000 },
+        { name: "Santa Hotspot", income: 2600000 },
+        { name: "Horegini Boom", income: 2750000 },
+        { name: "Pot Pumpkin", income: 3000000 },
+        { name: "Naughty Naughty", income: 3000000 },
+        { name: "Quesadilla Crocodila", income: 3000000 },
+        { name: "Bunito Bunito Spinito", income: 3000000 },
+        { name: "Cupid Cupid Sahur", income: 3100000 },
+        { name: "Mi Gatito", income: 3200000 },
+        { name: "Ho Ho Ho Sahur", income: 3200000 },
+        { name: "Cupid Hotspot", income: 3500000 },
+        { name: "Eid Eid Eid Sahur", income: 3500000 },
+        { name: "Chicleteira Bicicleteira", income: 3500000 },
+        { name: "Brunito Marsito", income: 3500000 },
+        { name: "Quesadillo Vampiro", income: 3500000 },
+        { name: "Luck Luck Luck Sahur", income: 3700000 },
+        { name: "Granny", income: 4000000 },
+        { name: "Chicleteirina Bicicleteirina", income: 4000000 },
+        { name: "Burrito Bandito", income: 4000000 },
+        { name: "Chill Puppy", income: 4000000 },
+        { name: "Los Quesadillas", income: 4500000 },
+        { name: "Arcadopus", income: 5000000 },
+        { name: "Noo my candy", income: 5000000 },
+        { name: "Serafinna Medusella", income: 5500000 },
+        { name: "Los Nooo My Hotspotsitos", income: 5500000 },
+        { name: "Noo my Present", income: 6000000 },
+        { name: "Rang Ring Bus", income: 6000000 },
+        { name: "Los Mi Gatitos", income: 6500000 },
+        { name: "Guest 666", income: 6600000 },
+        { name: "Noo my Eggs", income: 7000000 },
+        { name: "Los Chicleteiras", income: 7000000 },
+        { name: "67", income: 7500000 },
+        { name: "Donkeyturbo Express", income: 7500000 },
+        { name: "Los Burritos", income: 8500000 },
+        { name: "Los 25", income: 10000000 },
+        { name: "La Grande Combinasion", income: 10000000 },
+        { name: "Tacorillo Crocodillo", income: 12500000 },
+        { name: "Mariachi Corazoni", income: 12500000 },
+        { name: "Noo my Heart", income: 13000000 },
+        { name: "Swag Soda", income: 13000000 },
+        { name: "Noo my Gold", income: 13500000 },
+        { name: "Chimnino", income: 14000000 },
+        { name: "Chicleteira Noelteira", income: 15000000 },
+        { name: "Los Combinasionas", income: 15000000 },
+        { name: "Nuclearo Dinossauro", income: 15000000 },
+        { name: "Fishino Clownino", income: 15500000 },
+        { name: "Los Sweethearts", income: 16500000 },
+        { name: "Tacorita Bicicleta", income: 16500000 },
+        { name: "Spinny Hammy", income: 17000000 },
+        { name: "DJ Panda", income: 17500000 },
+        { name: "Las Sis", income: 17500000 },
+        { name: "Chicleteira Cupideira", income: 17500000 },
+        { name: "Los Planitos", income: 18500000 },
+        { name: "Snailo Clovero", income: 18500000 },
+        { name: "Los Jolly Combinasionas", income: 20000000 },
+        { name: "Cigno Fulgoro", income: 20000000 },
+        { name: "Los Spooky Combinasionas", income: 20000000 },
+        { name: "Los Hotspotsitos", income: 20000000 },
+        { name: "Money Money Puggy", income: 21000000 },
+        { name: "Los Mobilis", income: 22000000 },
+        { name: "Celularcini Viciosini", income: 22500000 },
+        { name: "Los 67", income: 22500000 },
+        { name: "Los Candies", income: 23000000 },
+        { name: "La Extinct Grande", income: 23500000 },
+        { name: "Los Bros", income: 24000000 },
+        { name: "Bacuru and Egguru", income: 24000000 },
+        { name: "La Spooky Grande", income: 24500000 },
+        { name: "Chillin Chili", income: 25000000 },
+        { name: "Money Money Reindeer", income: 25000000 },
+        { name: "Chipso and Queso", income: 25000000 },
+        { name: "Tuff Toucan", income: 26000000 },
+        { name: "Mieteteira Bicicleteira", income: 26000000 },
+        { name: "Gobblino Uniciclino", income: 27500000 },
+        { name: "Tralaledon", income: 27500000 },
+        { name: "Los Cupids", income: 30000000 },
+        { name: "Los Puggies", income: 30000000 },
+        { name: "W or L", income: 30000000 },
+        { name: "Esok Sekolah", income: 30000000 },
+        { name: "La Jolly Grande", income: 30000000 },
+        { name: "Los Primos", income: 31000000 },
+        { name: "Eviledon", income: 31500000 },
+        { name: "Los Tacoritas", income: 32000000 },
+        { name: "Lovin Rose", income: 32500000 },
+        { name: "Tang Tang Keletang", income: 33500000 },
+        { name: "Ketupat Kepat", income: 35000000 },
+        { name: "La Taco Combinasion", income: 35000000 },
+        { name: "Dug Dug Dug", income: 35000000 },
+        { name: "Tictac Sahur", income: 37500000 },
+        { name: "Swaggy Bros", income: 40000000 },
+        { name: "La Romantic Grande", income: 40000000 },
+        { name: "La Supreme Combinasion", income: 40000000 },
+        { name: "Orcaledon", income: 40000000 },
+        { name: "Ketchuru And Musturu", income: 42500000 },
+        { name: "Jolly Jolly Sahur", income: 45000000 },
+        { name: "Gold Gold Gold", income: 45000000 },
+        { name: "Lavadorito Spinito", income: 45000000 },
+        { name: "Nacho Spyder", income: 50000000 },
+        { name: "Rosetti Tualetti", income: 50000000 },
+        { name: "Garama and Madundung", income: 50000000 },
+        { name: "Cloverat Clapat", income: 60000000 },
+        { name: "Spaghetti Tualetti", income: 60000000 },
+        { name: "Ventoliero Pavonero", income: 65000000 },
+        { name: "Festive 67", income: 67000000 },
+        { name: "Los Spaghettis", income: 70000000 },
+        { name: "Sammyni Fattini", income: 70000000 },
+        { name: "Hokka Horloge", income: 75000000 },
+        { name: "Ginger Gerat", income: 75000000 },
+        { name: "La Ginger Sekolah", income: 75000000 },
+        { name: "Spooky and Pumpky", income: 80000000 },
+        { name: "La Food Combinasion", income: 90000000 },
+        { name: "Fragrama and Chocrama", income: 100000000 },
+        { name: "La Casa Boo", income: 100000000 },
+        { name: "Los Sekolahs", income: 110000000 },
+        { name: "Foxini Lanternini", income: 115000000 },
+        { name: "La Secret Combinasion", income: 125000000 },
+        { name: "Fortunu and Cashuru", income: 130000000 },
+        { name: "Los Amigos", income: 130000000 },
+        { name: "Reinito Sleighito", income: 140000000 },
+        { name: "Ketupat Bros", income: 145000000 },
+        { name: "Burguro And Fryuro", income: 150000000 },
+        { name: "Cooki and Milki", income: 155000000 },
+        { name: "Capitano Moby", income: 160000000 },
+        { name: "Rosey and Teddy", income: 165000000 },
+        { name: "Popcuru and Fizzuru", income: 170000000 },
+        { name: "Cerberus", income: 175000000 },
+        { name: "Celestial Pegasus", income: 175000000 },
+        { name: "Love Love Bear", income: 225000000 },
+        { name: "Dragon Cannelloni", income: 250000000 },
+        { name: "Dragon Gingerini", income: 300000000 },
+        { name: "Hydra Dragon Cannelloni", income: 350000000 },
+        { name: "Griffin", income: 400000000 },
+        { name: "Skibidi Toilet", income: 450000000 },
+        { name: "Headless Horseman", income: 550000000 },
+        { name: "Meowl", income: 600000000 },
+        { name: "Strawberry Elephant", income: 750000000 }
+    ];
+
+    const mutations = [
+        { name: "Gold", multiplier: 1.25 },
+        { name: "Diamond", multiplier: 1.5 },
+        { name: "Galaxy", multiplier: 7 },
+        { name: "Rainbow", multiplier: 10 },
+        { name: "Yin Yang", multiplier: 7.5 },
+        { name: "Radioactive", multiplier: 8.5 },
+        { name: "Cursed", multiplier: 9 },
+        { name: "Divine", multiplier: 10 }
+    ];
+
+    const traits = [
+        { name: "Strawberry", multiplier: 8 },
+        { name: "Meowl", multiplier: 7 },
+        { name: "Skibidi", multiplier: 6 },
+        { name: "Reindeer Pet", multiplier: 5 },
+        { name: "Chocolate", multiplier: 4.5 },
+        { name: "26", multiplier: 5 },
+        { name: "Halo", multiplier: 5 },
+        { name: "Lucky", multiplier: 5 },
+        { name: "Jack O'Lantern Pet", multiplier: 4.5 },
+        { name: "Bunny Ears", multiplier: 4.5 },
+        { name: "Santa Hat", multiplier: 4 },
+        { name: "RIP Tombstone", multiplier: 3.5 },
+        { name: "Witching Hour", multiplier: 3 },
+        { name: "Skeleton", multiplier: 3 },
+        { name: "10B", multiplier: 3 },
+        { name: "Orange Balloon", multiplier: 3 },
+        { name: "Green Balloon", multiplier: 3.5 },
+        { name: "Blue Balloon", multiplier: 4 },
+        { name: "Red Balloon", multiplier: 5 },
+        { name: "Pink Balloon", multiplier: 5.5 },
+        { name: "Rainbow Balloon", multiplier: 6.5 },
+        { name: "Orange Egg", multiplier: 3 },
+        { name: "Green Egg", multiplier: 4 },
+        { name: "Blue Egg", multiplier: 4.5 },
+        { name: "Pink Egg", multiplier: 6.7 },
+        { name: "Paint", multiplier: 5 },
+        { name: ":3", multiplier: 4.5 },
+        { name: "Tie", multiplier: 3.75 },
+        { name: "Spider", multiplier: 3.5 },
+        { name: "Matteo Hat", multiplier: 3.5 },
+        { name: "Galactic", multiplier: 3 },
+        { name: "Explosive", multiplier: 3 },
+        { name: "Shark Fin", multiplier: 3 },
+        { name: "Brazil", multiplier: 5 },
+        { name: "Indonesia", multiplier: 4 },
+        { name: "Sombrero", multiplier: 4 },
+        { name: "Granny", multiplier: 5.5 },
+        { name: "Fire", multiplier: 5 },
+        { name: "Rose", multiplier: 5 },
+        { name: "Fireworks", multiplier: 5 },
+        { name: "Nyan", multiplier: 5 },
+        { name: "Lightning", multiplier: 5 },
+        { name: "Disco", multiplier: 4 },
+        { name: "Glitched", multiplier: 4 },
+        { name: "Crab Claw", multiplier: 4 },
+        { name: "Zombie", multiplier: 4 },
+        { name: "Bubblegum", multiplier: 3 },
+        { name: "UFO", multiplier: 2 },
+        { name: "Taco", multiplier: 2 }
+    ];
+
+    // ============================================================
+    // TRADE STATE
+    // ============================================================
+    let giveItems = [];
+    let receiveItems = [];
+    let currentSide = 'give';
+    let selectedBrainrotForModal = null;
+    let selectedMutationForModal = null;
+    let selectedTraitsForModal = new Set();
+
+    // ============================================================
+    // CHAT STATE (local storage)
+    // ============================================================
+    let chatMessages = [];
+
+    function loadChatMessages() {
+        const saved = localStorage.getItem('tradeChatMessages');
+        if (saved) {
+            try {
+                chatMessages = JSON.parse(saved);
+            } catch(e) { chatMessages = []; }
+        }
+        renderChatMessages();
+    }
+
+    function saveChatMessages() {
+        localStorage.setItem('tradeChatMessages', JSON.stringify(chatMessages));
+    }
+
+    function addChatMessage(text) {
+        if (!text.trim()) return;
+        const message = {
+            id: Date.now(),
+            text: text.trim(),
+            timestamp: new Date().toLocaleTimeString(),
+            isUser: true
+        };
+        chatMessages.push(message);
+        saveChatMessages();
+        renderChatMessages();
+    }
+
+    function deleteChatMessage(id) {
+        chatMessages = chatMessages.filter(m => m.id !== id);
+        saveChatMessages();
+        renderChatMessages();
+    }
+
+    function clearAllChatMessages() {
+        if (confirm('Are you sure you want to clear ALL chat messages? This cannot be undone.')) {
+            chatMessages = [];
+            saveChatMessages();
+            renderChatMessages();
+        }
+    }
+
+    function renderChatMessages() {
+        const container = document.getElementById('chatMessages');
+        if (chatMessages.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding:2rem;">No messages yet. Start a conversation!</div>';
+            return;
+        }
+        
+        container.innerHTML = chatMessages.map(msg => `
+            <div class="chat-message chat-message-user">
+                <div class="chat-message-header">
+                    You • ${msg.timestamp}
+                    <button class="chat-message-delete" onclick="deleteChatMessage(${msg.id})">🗑️</button>
+                </div>
+                <div class="chat-message-text">${escapeHtml(msg.text)}</div>
+            </div>
+        `).join('');
+        
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================================
+    // TRADE HELPER FUNCTIONS
+    // ============================================================
+    function formatNumber(num) {
+        let roundedNum = Math.round(num);
+        if (roundedNum >= 1e12) return '$' + (roundedNum / 1e12).toFixed(2) + 'T';
+        if (roundedNum >= 1e9) return '$' + (roundedNum / 1e9).toFixed(2) + 'B';
+        if (roundedNum >= 1e6) return '$' + (roundedNum / 1e6).toFixed(2) + 'M';
+        if (roundedNum >= 1e3) return '$' + (roundedNum / 1e3).toFixed(2) + 'K';
+        return '$' + roundedNum.toLocaleString();
+    }
+
+    function calculateItemValue(item) {
+        let baseIncome = item.brainrot.income;
+        let mutationMultiplier = item.mutation ? item.mutation.multiplier : 0;
+        let traitsSum = 0;
+        for (let trait of item.traits) {
+            traitsSum += trait.multiplier;
+        }
+        let totalMultiplier = mutationMultiplier + traitsSum;
+        return baseIncome * totalMultiplier;
+    }
+
+    function calculateTotal(side) {
+        let items = side === 'give' ? giveItems : receiveItems;
+        let total = 0;
+        for (let item of items) {
+            total += calculateItemValue(item);
+        }
+        return total;
+    }
+
+    function updateUI() {
+        // Update Give panel
+        const giveContainer = document.getElementById('giveItems');
+        if (giveItems.length === 0) {
+            giveContainer.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:2rem;">No items added. Click "Add Item" below.</div>';
+        } else {
+            giveContainer.innerHTML = giveItems.map((item, idx) => {
+                let value = calculateItemValue(item);
+                let details = [];
+                if (item.mutation) details.push(`${item.mutation.name}`);
+                for (let trait of item.traits) details.push(`${trait.name}`);
+                return `
+                    <div class="trade-item">
+                        <div class="trade-item-header">
+                            <span class="trade-item-name">${item.brainrot.name}</span>
+                            <button class="remove-item" onclick="removeItem('give', ${idx})">✕</button>
+                        </div>
+                        <div class="trade-item-value">${formatNumber(value)}/s</div>
+                        <div class="trade-item-details">${details.join(', ') || 'No multipliers'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Update Receive panel
+        const receiveContainer = document.getElementById('receiveItems');
+        if (receiveItems.length === 0) {
+            receiveContainer.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:2rem;">No items added. Click "Add Item" below.</div>';
+        } else {
+            receiveContainer.innerHTML = receiveItems.map((item, idx) => {
+                let value = calculateItemValue(item);
+                let details = [];
+                if (item.mutation) details.push(`${item.mutation.name}`);
+                for (let trait of item.traits) details.push(`${trait.name}`);
+                return `
+                    <div class="trade-item">
+                        <div class="trade-item-header">
+                            <span class="trade-item-name">${item.brainrot.name}</span>
+                            <button class="remove-item" onclick="removeItem('receive', ${idx})">✕</button>
+                        </div>
+                        <div class="trade-item-value">${formatNumber(value)}/s</div>
+                        <div class="trade-item-details">${details.join(', ') || 'No multipliers'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Update totals
+        let giveTotal = calculateTotal('give');
+        let receiveTotal = calculateTotal('receive');
+        document.getElementById('giveTotal').innerHTML = formatNumber(giveTotal);
+        document.getElementById('receiveTotal').innerHTML = formatNumber(receiveTotal);
+        
+        // Update verdict
+        const verdictDiv = document.getElementById('verdict');
+        if (giveItems.length === 0 && receiveItems.length === 0) {
+            verdictDiv.innerHTML = 'Add items to both sides to see verdict';
+            verdictDiv.className = 'verdict';
+        } else if (giveItems.length === 0 || receiveItems.length === 0) {
+            verdictDiv.innerHTML = 'Add items to both sides to see verdict';
+            verdictDiv.className = 'verdict';
+        } else {
+            let diff = giveTotal - receiveTotal;
+            if (Math.abs(diff) < 0.01) {
+                verdictDiv.innerHTML = '✅ FAIR TRADE - Equal value!';
+                verdictDiv.className = 'verdict fair';
+            } else if (diff > 0) {
+                verdictDiv.innerHTML = `📉 LOSE - You are giving ${formatNumber(diff)} more than receiving`;
+                verdictDiv.className = 'verdict lose';
+            } else {
+                verdictDiv.innerHTML = `📈 WIN - You are receiving ${formatNumber(Math.abs(diff))} more than giving`;
+                verdictDiv.className = 'verdict win';
+            }
+        }
+    }
+
+    function removeItem(side, index) {
+        if (side === 'give') {
+            giveItems.splice(index, 1);
+        } else {
+            receiveItems.splice(index, 1);
+        }
+        updateUI();
+    }
+
+    // ============================================================
+    // MODAL FUNCTIONS
+    // ============================================================
+    function openAddModal(side) {
+        currentSide = side;
+        document.getElementById('modalSideLabel').innerText = side === 'give' ? 'Give' : 'Receive';
+        selectedBrainrotForModal = null;
+        selectedMutationForModal = null;
+        selectedTraitsForModal.clear();
+        document.getElementById('multiplierSelector').style.display = 'none';
+        document.getElementById('confirmAddBtn').disabled = true;
+        document.getElementById('modalSearch').value = '';
+        renderModalBrainrotList('');
+        document.getElementById('addModal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('addModal').style.display = 'none';
+    }
+    
+    function renderModalBrainrotList(searchTerm) {
+        const container = document.getElementById('modalBrainrotList');
+        const filtered = brainrots.filter(b => 
+            b.name.toLowerCase().includes(searchTerm.toLowerCase())
+        ).slice(0, 50);
+        
+        container.innerHTML = filtered.map(b => `
+            <div class="modal-brainrot-item" onclick="selectModalBrainrot('${b.name.replace(/'/g, "\\'")}')">
+                <span>${b.name}</span>
+                <span style="color:#c084fc;">${formatNumber(b.income)}/s</span>
+            </div>
+        `).join('');
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="padding:1rem; text-align:center;">No brainrots found</div>';
+        }
+    }
+    
+    window.selectModalBrainrot = function(name) {
+        selectedBrainrotForModal = brainrots.find(b => b.name === name);
+        selectedMutationForModal = null;
+        selectedTraitsForModal.clear();
+        renderModalMultipliers();
+        document.getElementById('multiplierSelector').style.display = 'block';
+        document.getElementById('confirmAddBtn').disabled = false;
+    };
+    
+    function renderModalMultipliers() {
+        // Mutations
+        const mutationContainer = document.getElementById('modalMutationButtons');
+        mutationContainer.innerHTML = mutations.map(m => `
+            <button class="small-btn ${selectedMutationForModal?.name === m.name ? 'selected' : ''}" onclick="selectModalMutation('${m.name}')">
+                ${m.name}
+            </button>
+        `).join('');
+        
+        // Traits
+        const traitContainer = document.getElementById('modalTraitButtons');
+        traitContainer.innerHTML = traits.map(t => `
+            <button class="small-btn ${selectedTraitsForModal.has(t) ? 'selected' : ''}" onclick="toggleModalTrait('${t.name}')">
+                ${t.name}
+            </button>
+        `).join('');
+        
+        // Selected traits display
+        const selectedContainer = document.getElementById('modalSelectedTraits');
+        if (selectedTraitsForModal.size === 0) {
+            selectedContainer.innerHTML = '';
+        } else {
+            selectedContainer.innerHTML = 'Selected: ' + Array.from(selectedTraitsForModal).map(t => t.name).join(', ');
+        }
+    }
+    
+    window.selectModalMutation = function(name) {
+        selectedMutationForModal = mutations.find(m => m.name === name);
+        renderModalMultipliers();
+    };
+    
+    window.toggleModalTrait = function(name) {
+        const trait = traits.find(t => t.name === name);
+        if (selectedTraitsForModal.has(trait)) {
+            selectedTraitsForModal.delete(trait);
+        } else {
+            selectedTraitsForModal.add(trait);
+        }
+        renderModalMultipliers();
+    };
+    
+    window.confirmAddItem = function() {
+        if (!selectedBrainrotForModal) return;
+        
+        const item = {
+            brainrot: selectedBrainrotForModal,
+            mutation: selectedMutationForModal,
+            traits: Array.from(selectedTraitsForModal)
+        };
+        
+        if (currentSide === 'give') {
+            giveItems.push(item);
+        } else {
+            receiveItems.push(item);
+        }
+        
+        updateUI();
+        closeModal();
+    };
+    
+    // ============================================================
+    // INITIALIZE
+    // ============================================================
+    function init() {
+        updateUI();
+        loadChatMessages();
+        
+        // Chat event listeners
+        document.getElementById('sendChatBtn').addEventListener('click', () => {
+            const input = document.getElementById('chatInput');
+            addChatMessage(input.value);
+            input.value = '';
+        });
+        
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('chatInput');
+                addChatMessage(input.value);
+                input.value = '';
+            }
+        });
+        
+        document.getElementById('clearChatBtn').addEventListener('click', clearAllChatMessages);
+    }
+    
+    // Search input handler
+    document.getElementById('modalSearch').addEventListener('input', (e) => {
+        renderModalBrainrotList(e.target.value);
+    });
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('addModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+    
+    // Make functions global for onclick
+    window.removeItem = removeItem;
+    window.deleteChatMessage = deleteChatMessage;
+    
+    init();
+</script>
+</body>
+</html>
